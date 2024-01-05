@@ -44,7 +44,7 @@ export default function Home() {
         const json = await response.json()
         console.log(json);
         if (json.success) {
-          
+          setDataArray(json.data); 
           navigate("/")
     
         }
@@ -74,14 +74,15 @@ export default function Home() {
     <h1>{day}</h1>
 </div>
         <div className="box">
-        
+        {dataArray.map((item, index) => (
             <form action="/delete" method="post" >              
             <div className="item">
             <input type="checkbox" name="checkbox" value="<%=item._id %>" onChange={handleDelete}></input>
-        <p></p>
+        <p name={index}>{item}</p>
     </div>
     
 </form>
+ ))}
         <form  className="item" onSubmit={handleSubmit}>
             <input onChange={handleInputChange} type="text" name="newItem" placeholder="New Item" className='inputlist' autoComplete="off"></input>
             <button type="submit" name="list" value="">+</button>

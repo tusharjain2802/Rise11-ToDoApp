@@ -153,7 +153,7 @@ app.post('/getItems', async(req,res)=>{
             List.findOne({name:email}, function(err, userlist){
                 res.status(200).send({
                     success: true,
-                    data: [userlist.items]
+                    data: userlist.items
                   });
             });
         }
