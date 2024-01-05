@@ -5,6 +5,33 @@ html {
   font-family: 'helvetica neue';
 }
 
+/* Header.css */
+
+/* Header Styles */
+.header {
+  background-color: #A683E3;
+  color: #E4E9FD;
+  padding: 20px;
+}
+
+/* Navigation Links Styles */
+.nav-links {
+  list-style: none;
+  padding: 0;
+  display: flex;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: #E4E9FD;
+  margin-right: 20px;
+}
+
+.nav-link:hover {
+  text-decoration: underline;
+}
+
+
 h1 {
   color: #fff;
   padding: 10px;
@@ -22,6 +49,37 @@ h1 {
   background-color: #A683E3;
   text-align: center;
 }
+
+/* LoginPrompt.css */
+
+.login-prompt {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  /* background-color: #A683E3; */
+  color: #A683E3;
+  font-family: Arial, sans-serif;
+  text-align: center;
+}
+
+.login-prompt h2 {
+  font-size: 2.5em;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.login-prompt p {
+  font-size: 1.5em;
+  margin-bottom: 20px;
+}
+
+.login-prompt a {
+  color: #E4E9FD;
+  text-decoration: underline;
+}
+
 
 .item {
   min-height: 70px;

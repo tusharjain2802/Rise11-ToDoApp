@@ -28,6 +28,10 @@ export default function Home() {
           console.error('Error deleting item:', error);
         }
       };
+      const handleLogOut = async(e) => {
+        localStorage.removeItem('userEmail');
+        navigate("/login")
+      }
       const handleSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -84,8 +88,18 @@ export default function Home() {
             return day;
     }
     let day = getDate();
+    if(storedEmail){
   return (
     <div>
+    <header className="header">
+      <nav>
+        <ul className="nav-links">
+          <li>
+            <span onClick={handleLogOut} className="nav-link">LogOut</span>
+          </li>
+        </ul>
+      </nav>
+    </header>
     <div className="box" id="heading">
     <h1>{day}</h1>
 </div>
@@ -107,4 +121,13 @@ export default function Home() {
 <Footer />
       </div>
   )
+}else{
+  return(
+    <div className="login-prompt">
+    <h2>Please Login Before Using the Todo App</h2>
+    <p>You need to be logged in to access this feature.</p>
+    <Link to="/login">Login Here</Link>
+  </div>
+  )
+}
 }

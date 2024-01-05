@@ -31,6 +31,16 @@ export default function Signup() {
     };
   
     return (
+      <div>
+      <header className="header">
+      <nav>
+        <ul className="nav-links">
+          <li>
+            <Link to="/login" className="nav-link">Login</Link>
+          </li>
+        </ul>
+      </nav>
+    </header>
       <div className="container">
         <form id="signup-form" className="form" onSubmit={handleSignupSubmit}>
           <h2>Sign Up</h2>
@@ -61,6 +71,7 @@ export default function Signup() {
           <button type="submit">Sign Up</button>
         </form>
         <Footer />
+      </div>
       </div>
     );
 }

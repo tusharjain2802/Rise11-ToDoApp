@@ -34,7 +34,18 @@ export default function Login() {
     };
   
     return (
+      <div>
+      <header className="header">
+      <nav>
+        <ul className="nav-links">
+          <li>
+            <Link to="/signup" className="nav-link">Register</Link>
+          </li>
+        </ul>
+      </nav>
+    </header>
       <div className="container">
+      
         <form id="login-form" className="form" onSubmit={handleLoginSubmit}>
           <h2>Login</h2>
           <input
@@ -56,6 +67,7 @@ export default function Login() {
           <button type="submit">Login</button>
         </form>
         <Footer />
+      </div>
       </div>
     );
 }
