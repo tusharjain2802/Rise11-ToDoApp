@@ -145,8 +145,7 @@ app.post('/getItems', async(req,res)=>{
     let success = false;
     const { email} = req.body;
     try {
-        let user = await User.findOne({ email:email }); 
-        console.log(user.email);
+        let user = await List.findOne({ name:email }); 
         if (!user) {
             return res.status(400).json({ success, error: "Add your first item to the To-Do list!" });
         }else{

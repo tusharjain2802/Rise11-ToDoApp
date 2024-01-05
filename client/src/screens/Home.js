@@ -25,7 +25,7 @@ export default function Home() {
     
           const json = await response.json();
           if (json.success) {
-            navigate("/");
+            window.location.reload(false);
           }
         } catch (error) {
           console.error('Error sending data:', error);
