@@ -9,8 +9,24 @@ export default function Home() {
     const handleInputChange = (e) => {
         setInputValue(e.target.value);
       };
-      const handleDelete = (event) => {
-        event.target.form.submit();
+      const handleDelete = async(index) => {
+        try {
+          const response = await fetch('http://localhost:5000/delete', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({email:storedEmail, index: index }),
+          });
+          const json = await response.json();
+          if (json.success) {
+            window.location.reload(false);
+          } else {
+            console.error('Failed to delete item');
+          }
+        } catch (error) {
+          console.error('Error deleting item:', error);
+        }
       };
       const handleSubmit = async (e) => {
         e.preventDefault();
@@ -75,9 +91,9 @@ export default function Home() {
 </div>
         <div className="box">
         {dataArray.map((item, index) => (
-            <form action="/delete" method="post" >              
+            <form>              
             <div className="item">
-            <input type="checkbox" name="checkbox" value="<%=item._id %>" onChange={handleDelete}></input>
+            <input type="checkbox" name="checkbox" value={index} onChange={()=>handleDelete(index)}></input>
         <p name={index}>{item}</p>
     </div>
     

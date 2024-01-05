@@ -166,52 +166,30 @@ app.post('/getItems', async(req,res)=>{
     }
 })
 
-app.post("/", function(req,res){
-    let itemname = req.body.newItem;
-    let day = date.getDate();
-    
-   
 
-    if(listName === day){
-    item.save(); 
-    //it renders the added item to home route
-    // if(req.body.list === "Work List"){
-    //     workItems.push(item);
-    //     res.redirect("/work");
-    // }
-    // else{
-    //     items.push(item);
-    //     res.redirect("/");
-    // }
-    res.redirect("/");
-    }
-    else{
-        List.findOne({name:listName}, function(err, foundList){
-            foundList.items.push(item);
-            foundList.save();
-            res.redirect("/"+listName);
-        });
-    }
-    
-});
+app.post('/delete', async(req,res)=>{
+    let success = false;
+    const {email, index} = req.body;
+    console.log(index);
+    try {
+        let list = await List.findOne({ name:email }); 
+        if (!list) {
+            return res.status(400).json({ success, error: "Unknown Error!" });
+        }else{
 
-app.post("/delete",function(req,res){
-    const checkedBodyItem =req.body.checkbox;
-    const listName = req.body.listName;
-
-    let day = date.getDate();
-    if(listName=== day){
-
-    res.redirect("/");
-}
-else{
-    List.findOneAndUpdate({name:listName},{$pull:{items:{_id:checkedBodyItem}}}, function(err,foundList){
-        if(!err){
-            res.redirect("/"+listName); 
+            list.items.splice(index, 1);
+            await list.save();
+            res.send({success: true});
         }
-    });
-}
-});
+        
+
+
+    } catch (error) {
+        console.error(error.message)
+        console.log("error in getting items");
+        return res.status(400).json({ success, error: "Add your first item to the To-Do list!" });
+    }
+})
 
 
 
