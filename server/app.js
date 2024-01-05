@@ -134,20 +134,16 @@ app.post('/sendData', async(req,res)=>{
                 }
               );
         }
-    
-        success = true;
-        res.json({ success })
-
 
     } catch (error) {
         console.error(error.message)
         res.send("Server Error")
-    }   
+    }    
 })
 
 app.post('/getItems', async(req,res)=>{
     let success = false;
-    const { email } = req.body;
+    const { email} = req.body;
     try {
         let user = await User.findOne({ email:email }); 
         console.log(user.email);
@@ -155,16 +151,19 @@ app.post('/getItems', async(req,res)=>{
             return res.status(400).json({ success, error: "Add your first item to the To-Do list!" });
         }else{
             List.findOne({name:email}, function(err, userlist){
-                res.send([userlist.items]);
+                res.status(200).send({
+                    success: true,
+                    data: [userlist.items]
+                  });
             });
         }
-        success = true;
-        res.json({ success })
+        
 
 
     } catch (error) {
         console.error(error.message)
-        res.send("Server Error")
+        console.log("error in getting items");
+        return res.status(400).json({ success, error: "Add your first item to the To-Do list!" });
     }
 })
 
@@ -172,9 +171,7 @@ app.post("/", function(req,res){
     let itemname = req.body.newItem;
     let day = date.getDate();
     
-    const item = new Item({
-        name: itemname
-    });
+   
 
     if(listName === day){
     item.save(); 
@@ -205,14 +202,7 @@ app.post("/delete",function(req,res){
 
     let day = date.getDate();
     if(listName=== day){
-    Item.findByIdAndRemove(checkedBodyItem,function(err){
-        if(err){
-            console.log(err);
-        }
-        else{
-            console.log("Deleted Checked Item");
-        }
-    });
+
     res.redirect("/");
 }
 else{
@@ -224,22 +214,7 @@ else{
 }
 });
 
-app.get("/",function (req, res){
-    Item.find({}, function(err, foundItems){
-        if(foundItems.length === 0){
-        Item.insertMany(defaultItems, function(err){
-            if(err){
-            console.log(err);
-            }
-        });
-        res.redirect("/");
-        }
-        else{
-        let day = date.getDate();
-        res.render("list",{listTitle:day,newListItems:foundItems});
-        }
-    });
-});
+
 
 
 app.listen(5000 || process.env.PORT, function(){

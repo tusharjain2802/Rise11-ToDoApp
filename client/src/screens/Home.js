@@ -5,11 +5,13 @@ export default function Home() {
     let navigate = useNavigate()
     const storedEmail = localStorage.getItem('userEmail');
     const [inputValue, setInputValue] = useState('');
-
+    const [dataArray, setDataArray] = useState([]);
     const handleInputChange = (e) => {
         setInputValue(e.target.value);
       };
-    
+      const handleDelete = (event) => {
+        event.target.form.submit();
+      };
       const handleSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -21,13 +23,15 @@ export default function Home() {
             body: JSON.stringify({email: storedEmail, data: inputValue }),
           });
     
-          await response.json();
-          
+          const json = await response.json();
+          if (json.success) {
+            navigate("/");
+          }
         } catch (error) {
           console.error('Error sending data:', error);
         }
       };
-    const loadFoodItems= async() => {
+    const loadItems= async() => {
         
         const response = await fetch("http://localhost:5000/getItems", {
           method: 'POST',
@@ -50,7 +54,7 @@ export default function Home() {
       };
     
       useEffect(() => {
-        loadFoodItems()
+        loadItems()
       }, [])
 
     function getDate(){
@@ -66,20 +70,20 @@ export default function Home() {
     let day = getDate();
   return (
     <div>
-    <div class="box" id="heading">
+    <div className="box" id="heading">
     <h1>{day}</h1>
 </div>
-        <div class="box">
+        <div className="box">
         
             <form action="/delete" method="post" >              
-            <div class="item">
-            <input type="checkbox" name="checkbox" value="<%=item._id %>" onChange="this.form.submit()"></input>
+            <div className="item">
+            <input type="checkbox" name="checkbox" value="<%=item._id %>" onChange={handleDelete}></input>
         <p></p>
     </div>
     
 </form>
-        <form  class="item" onSubmit={handleSubmit}>
-            <input onChange={handleInputChange} type="text" name="newItem" placeholder="New Item" className='inputlist' autocomplete="off"></input>
+        <form  className="item" onSubmit={handleSubmit}>
+            <input onChange={handleInputChange} type="text" name="newItem" placeholder="New Item" className='inputlist' autoComplete="off"></input>
             <button type="submit" name="list" value="">+</button>
         </form>
     </div>
