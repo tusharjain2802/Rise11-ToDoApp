@@ -1,0 +1,247 @@
+const express = require("express");
+const app = express();
+const date = require(__dirname+"/views/date.js")
+const mongoose  = require("mongoose");
+const bcrypt = require('bcryptjs')
+const { body, validationResult } = require('express-validator');
+let bodyParser = require("body-parser");
+
+const User = require('./models/User');
+
+mongoose.connect("mongodb+srv://admin-tushar:pswd6920@cluster0.lngsx.mongodb.net/toDoListDB",{UseNewUrlParser:true});
+app.use(bodyParser.json());
+app.set('view engine', 'ejs');
+app.use(express.static("public"));
+
+
+
+var listSchema = {
+    name: String,
+    items: [String]
+};
+
+const List = mongoose.model("List", listSchema);
+
+app.use((req, res, next) => {
+    res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+    res.header(
+      "Access-Control-Allow-Headers",
+      "Origin, X-Requested-With, Content-Type, Accept"
+    );
+    next();
+  });
+
+app.post('/signup', [
+    body('email').isEmail(),
+    body('password').isLength({ min: 5 }),
+    body('name').isLength({ min: 3 })
+], async (req, res) => {
+    const { name, email, password } = req.body;
+    let success = false;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ success, errors: errors.array() })
+    }
+
+    const salt = await bcrypt.genSalt(10)
+    let securePass = await bcrypt.hash(req.body.password, salt);
+    try {
+        User.findOne({ email:email }, (err, foundDocument) => {
+            if (err) {
+              console.error('Error finding document:', err);
+              
+            } else {
+              if (foundDocument) {
+                console.log('Document Name:', foundDocument.name);
+                console.log('Document Email:', foundDocument.email);
+                return res.status(400).json({ success })
+              } else {
+                    User.create({
+                    name: req.body.name,
+                    password: securePass,
+                    email: req.body.email
+                })
+                success = true;
+                res.json({success})
+              }
+            }
+          });
+        
+    } catch (error) {
+        console.error(error.message)
+    }
+})
+
+app.post('/login', [
+    body('email', "Enter a Valid Email").isEmail(),
+    body('password', "Password cannot be blank").exists(),
+], async (req, res) => {
+    let success = false;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() })
+    }
+
+    const { email, password } = req.body;
+    try {
+        let user = await User.findOne({ email }); 
+        if (!user) {
+            return res.status(400).json({ success, error: "Try Logging in with correct credentials" });
+        }
+
+        const pwdCompare = await bcrypt.compare(password, user.password); 
+        if (!pwdCompare) {
+            return res.status(400).json({ success, error: "The password is Incorrect" });
+        }
+
+        success = true;
+        res.json({ success })
+
+
+    } catch (error) {
+        console.error(error.message)
+        res.send("Server Error")
+    }
+})
+
+
+app.post('/sendData', async(req,res)=>{
+    let success = false;
+    const { email, data} = req.body;
+    try {
+        let user = await List.findOne({name:email});
+        if (!user) {
+            const newList = new List({
+                name: email,
+                items: [data]
+            });
+            newList.save();
+            success = true;
+            res.json({ success })
+     
+        }else{
+            List.findOneAndUpdate(
+                { name: email },
+                { $push: { items: data } },
+                { new: true, useFindAndModify: false },
+                (err, updatedList) => {
+                  if (err) {
+                    console.error('Error inserting item:', err);
+                  } else {
+                    success = true;
+                    res.json({ success })
+                  }
+                }
+              );
+        }
+    
+        success = true;
+        res.json({ success })
+
+
+    } catch (error) {
+        console.error(error.message)
+        res.send("Server Error")
+    }   
+})
+
+app.post('/getItems', async(req,res)=>{
+    let success = false;
+    const { email } = req.body;
+    try {
+        let user = await User.findOne({ email:email }); 
+        console.log(user.email);
+        if (!user) {
+            return res.status(400).json({ success, error: "Add your first item to the To-Do list!" });
+        }else{
+            List.findOne({name:email}, function(err, userlist){
+                res.send([userlist.items]);
+            });
+        }
+        success = true;
+        res.json({ success })
+
+
+    } catch (error) {
+        console.error(error.message)
+        res.send("Server Error")
+    }
+})
+
+app.post("/", function(req,res){
+    let itemname = req.body.newItem;
+    let day = date.getDate();
+    
+    const item = new Item({
+        name: itemname
+    });
+
+    if(listName === day){
+    item.save(); 
+    //it renders the added item to home route
+    // if(req.body.list === "Work List"){
+    //     workItems.push(item);
+    //     res.redirect("/work");
+    // }
+    // else{
+    //     items.push(item);
+    //     res.redirect("/");
+    // }
+    res.redirect("/");
+    }
+    else{
+        List.findOne({name:listName}, function(err, foundList){
+            foundList.items.push(item);
+            foundList.save();
+            res.redirect("/"+listName);
+        });
+    }
+    
+});
+
+app.post("/delete",function(req,res){
+    const checkedBodyItem =req.body.checkbox;
+    const listName = req.body.listName;
+
+    let day = date.getDate();
+    if(listName=== day){
+    Item.findByIdAndRemove(checkedBodyItem,function(err){
+        if(err){
+            console.log(err);
+        }
+        else{
+            console.log("Deleted Checked Item");
+        }
+    });
+    res.redirect("/");
+}
+else{
+    List.findOneAndUpdate({name:listName},{$pull:{items:{_id:checkedBodyItem}}}, function(err,foundList){
+        if(!err){
+            res.redirect("/"+listName); 
+        }
+    });
+}
+});
+
+app.get("/",function (req, res){
+    Item.find({}, function(err, foundItems){
+        if(foundItems.length === 0){
+        Item.insertMany(defaultItems, function(err){
+            if(err){
+            console.log(err);
+            }
+        });
+        res.redirect("/");
+        }
+        else{
+        let day = date.getDate();
+        res.render("list",{listTitle:day,newListItems:foundItems});
+        }
+    });
+});
+
+
+app.listen(5000 || process.env.PORT, function(){
+console.log("Server started on port 5000");
+});
