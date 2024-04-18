@@ -163,6 +163,34 @@ app.post('/getItems', async (req, res) => {
   });
 
 
+app.post('/edit', async(req,res)=>{
+    let success = false;
+    const email = decryptData(req.body.email);
+    const {index, newText} = req.body;
+    // console.log(index);
+    try {
+        let list = await List.findOne({ name:email }); 
+        if (!list) {
+            return res.status(400).json({ success, error: "List not found!" });
+        }else{
+            if (index >= 0 && index < list.items.length) {
+                list.items[index] = newText; // Update the item at the specified index
+                await list.save();
+                success = true;
+                res.json({ success, message: "Item updated successfully." });
+            } else {
+                return res.status(400).json({ success, error: "Invalid item index." });
+            }
+        }
+
+    } catch (error) {
+        console.error(error.message)
+        console.log("error Updating item");
+        return res.status(500).json({ success, error: "Server error"});
+    }
+})
+
+
 app.post('/delete', async(req,res)=>{
     let success = false;
     const email = decryptData(req.body.email);
@@ -173,7 +201,6 @@ app.post('/delete', async(req,res)=>{
         if (!list) {
             return res.status(400).json({ success, error: "Unknown Error!" });
         }else{
-
             list.items.splice(index, 1);
             await list.save();
             res.send({success: true});
@@ -184,12 +211,9 @@ app.post('/delete', async(req,res)=>{
     } catch (error) {
         console.error(error.message)
         console.log("error in getting items");
-        return res.status(400).json({ success, error: "Add your first item to the To-Do list!" });
+        return res.status(400).json({ success, error: "Error deleting" });
     }
 })
-
-
-
 
 app.listen(5000 || process.env.PORT, function(){
 console.log("Server started on port 5000");

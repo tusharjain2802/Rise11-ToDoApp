@@ -93,7 +93,8 @@ export default function Home() {
           });
           const json = await response.json();
           if (json.success) {
-            handleToggleEdit(index); // toggle off edit mode
+            handleToggleEdit(index); 
+            toast.success("Successfully updated the item");
           } else {
             console.error('Failed to update item');
           }
