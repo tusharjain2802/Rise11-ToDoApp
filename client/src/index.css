@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 html {
   background-color: #E4E9FD;
   background-image: -webkit-linear-gradient(65deg, #A683E3 50%, #E4E9FD 50%);
@@ -190,4 +194,16 @@ footer {
 
 .form button:hover {
   background-color: #0056b3;
+}
+
+.faedit{
+  margin-left: auto;
+  margin-right: 20px;
+}
+
+.submitsave{
+  font-size: 13px;
+  margin-left: 120px;
+  border-radius:0%;
+  padding: 1px 43px;
 }

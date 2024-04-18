@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import toast, { Toaster } from "react-hot-toast";
+import { MdDelete } from "react-icons/md";
+import { FaEdit } from "react-icons/fa";
 import Footer from '../components/Footer'
 export default function Home() {
     let navigate = useNavigate()
@@ -66,7 +68,8 @@ export default function Home() {
         const json = await response.json()
         console.log(json);
         if (json.success) {
-          setDataArray(json.data); 
+          const formattedData = json.data.map(item => ({ value: item, isEditing: false }));
+          setDataArray(formattedData); 
           navigate("/");
         }
         else {
@@ -78,6 +81,42 @@ export default function Home() {
       useEffect(() => {
         loadItems()
       }, [])
+
+      const handleSaveEdit = async (index, value) => {
+        try {
+          const response = await fetch('http://localhost:5000/edit', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({email: storedEmail, index: index, newText: value}),
+          });
+          const json = await response.json();
+          if (json.success) {
+            handleToggleEdit(index); // toggle off edit mode
+          } else {
+            console.error('Failed to update item');
+          }
+        } catch (error) {
+          console.error('Error updating item:', error);
+        }
+    };
+
+      const handleToggleEdit = (index) => {
+        setDataArray(currentData => 
+            currentData.map((item, i) => 
+                i === index ? { ...item, isEditing: !item.isEditing } : item
+            )
+        );
+    };
+    
+    const handleChangeItem = (index, newValue) => {
+        setDataArray(currentData =>
+            currentData.map((item, i) => 
+                i === index ? { ...item, value: newValue } : item
+            )
+        );
+    };
 
     function getDate(){
         var today = new Date();
@@ -107,14 +146,25 @@ export default function Home() {
 </div>
         <div className="box">
         {dataArray.map((item, index) => (
-            <form>              
-            <div className="item">
-            <input type="checkbox" name="checkbox" value={index} onChange={()=>handleDelete(index)}></input>
-        <p name={index}>{item}</p>
-    </div>
-    
-</form>
- ))}
+                item.isEditing ? (
+                    <form onSubmit={(e) => { e.preventDefault(); handleSaveEdit(index, item.value); }}>
+                        <input
+                            type="text"
+                            style={{border:"none", marginLeft:"20px"}}
+                            value={item.value}
+                            onChange={(e) => handleChangeItem(index, e.target.value)}
+                            autoFocus
+                        />
+                        <button className='submitsave' type="submit">Save</button>
+                    </form>
+                ) : (
+                    <div className="item">
+                        <MdDelete onClick={() => handleDelete(index)} />
+                        <p>{item.value}</p>
+                        <FaEdit className='faedit' onClick={() => handleToggleEdit(index)} />
+                    </div>
+                )
+            ))}
         <form  className="item" onSubmit={handleSubmit}>
             <input onChange={handleInputChange} type="text" name="newItem" placeholder="New Item" className='inputlist' autoComplete="off"></input>
             <button type="submit" name="list" value="">+</button>
